@@ -1,10 +1,10 @@
 import pymysql, sys, logging, datetime, json
 from os import getenv
 
-rds_host = "devlambda-cluster.cluster-cigrydi9davg.eu-west-1.rds.amazonaws.com"
-username = "walid"
-password = "password123"
-dbname = "web"
+rds_host = getenv('DB_HOST')
+username = getenv('DB_USER')
+password = getenv('DB_PASS')
+dbname = getenv('DB_NAME')
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 try:
@@ -15,7 +15,6 @@ except:
     sys.exit()
 
 logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
-a = {"requestContext": {"identity": {"sourceIp": "192.158.125", "userAgent": "chrome"}}}
 
 
 def handler(event,context):
@@ -24,14 +23,15 @@ def handler(event,context):
     user_ip = event['requestContext']['identity']['sourceIp']
     user_agent = event['requestContext']['identity']['userAgent']
     with conn.cursor() as cur:
-        cur.execute("INSERT INTO Connections (User_ip,User_agent,Request_date) VALUES (%s,%s,%s)",
-                    (user_ip, user_agent, req_time))
+        cur.execute("INSERT INTO Connections (User_ip,User_agent,Request_date) VALUES (%s,%s,%s)",(user_ip, user_agent, req_time))
     rs['user_ip'] = user_ip
     rs['user_agent'] = user_agent
     rs['req_time'] = str(req_time)
     return json.dumps(rs)
 
+
 def handler2(event, context):
+
     result = []
     with conn.cursor() as cur:
         cur.execute("SELECT * FROM Connections")
@@ -39,5 +39,3 @@ def handler2(event, context):
             rs = {"id": row[0], "user_ip": row[1], "user_agent": row[2], "req_time": str(row[3])}
             result.append(rs)
     return json.dumps(result)
-
-print(handler2(None,None))

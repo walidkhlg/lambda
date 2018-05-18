@@ -5,7 +5,7 @@ current_time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
 # zip lambda project folder
 def lambdazip(path):
-    zipname = 'serverless'+current_time+'.zip'
+    zipname = 'lambda_function'+current_time+'.zip'
     newzip = zipfile.ZipFile(zipname, 'a')
     for root, dirs, files in os.walk(path):
         for i in files:
@@ -16,7 +16,7 @@ def lambdazip(path):
 # check test status ( fail / pass)
 def check_tests():
     filename = run_tests()
-    test_report_file = os.path.abspath(os.path.join(os.path.dirname(__file__), filename))
+    test_report_file = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_results/'+filename))
     with open(test_report_file, 'r') as test_report:
         data = test_report.read()
         print(data)
@@ -27,7 +27,7 @@ def check_tests():
 # run tests and write them in a log file
 def run_tests():
     filename = "pytest_report"+current_time+".log"
-    os.system('pytest test.py -v > ' + filename)
+    os.system('pytest test.py -v > ./test_results/' + filename)
     return filename
 
 
@@ -39,9 +39,6 @@ params = parser.parse_args()
 # run the tests , check if passed
 if (check_tests()):
     print("Tests passed , Zipping lambda function")
-    lambda_zip_file_name = lambdazip(params.path)
-    session = boto3.Session(profile_name='compte-lab-26')
-    s3 = session.client('s3')
-    s3.upload_file(lambda_zip_file_name, params.bucket, lambda_zip_file_name)
+    #lambda_zip_file_name = lambdazip(params.path)
 else:
     print('Tests failed')

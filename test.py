@@ -1,5 +1,4 @@
 from main import handler, handler2
-import socket
 import json
 
 a = {"requestContext": {"identity": {"sourceIp": "192.158.125", "userAgent": "chrome"}}}
